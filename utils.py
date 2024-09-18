@@ -52,6 +52,7 @@ class Chat:
         if not kb_id:
             raise ValueError("Knowledge Base ID is required")
         print(f'inferencing: {text}')
+        # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_RetrieveAndGenerate.html
         response = self.client.retrieve_and_generate(
             input={
                 'text': text
@@ -62,10 +63,18 @@ class Chat:
                     'modelArn': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0',
                     'retrievalConfiguration': {
                         'vectorSearchConfiguration': {
-                            'overrideSearchType': 'HYBRID'
+                            'overrideSearchType': 'HYBRID',
+                            "numberOfResults": 10,
                         }
                     }
                 },
+                # "externalSourcesConfiguration": {
+                #     "generationConfiguration": {
+                #         "promptTemplate": {
+                #             "textPromptTemplate": "prompt template"
+                #         }
+                #     }
+                # },
                 'type': 'KNOWLEDGE_BASE'
             }
         )
