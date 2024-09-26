@@ -1,16 +1,15 @@
 import re
+from pprint import pprint
+from typing import List
 
 import boto3
+from boto3 import Session
 from dotenv import load_dotenv
-import string
 import urllib.parse
-import random
-
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
 import base64
-
 from config import Config
 
 
@@ -44,39 +43,97 @@ def decrypt_with_private_key(encrypted_message):
         return None
 
 class Chat:
-    def __init__(self):
-        load_dotenv()
-        self.client = boto3.client('bedrock-agent-runtime', region_name="us-east-1")
+    def __init__(self, kb_id: str):
+        # load_dotenv()
+        self.session = self.__get_sessoin()
+        self.client = self.session.client('bedrock-agent-runtime', region_name=Config.LOCATION)
+        self.kb_id = kb_id
+        data_source_ids = self.get_data_source_ids()
+        self.filter = self.get_kb_datasource_filter(data_source_ids)
 
-    def inference(self, kb_id, text, ):
-        if not kb_id:
+    def __get_sessoin(self):
+        sts_client = boto3.client('sts')
+
+        # Assume the role
+        response = sts_client.assume_role(
+            RoleArn='arn:aws:iam::730335415390:role/my-st-app-role',  # Replace with your Role ARN
+            RoleSessionName='S3AccessSession'
+        )
+
+        credentials = response['Credentials']
+
+        # Use the temporary credentials to create a session
+        session = Session(
+            aws_access_key_id=credentials.get('AccessKeyId'),
+            aws_secret_access_key=credentials.get('SecretAccessKey'),
+            aws_session_token=credentials.get('SessionToken'),
+            profile_name="AWSAdministratorAccess-730335415390",
+        )
+        return session
+
+    def get_data_source_ids(self) -> List[str]:
+        client = self.session.client('bedrock-agent')  # , region_name=Config.LOCATION)
+        response = client.list_data_sources(
+            knowledgeBaseId=self.kb_id,
+            maxResults=100,
+        )
+        results = [data_source.get('dataSourceId') for data_source in response.get('dataSourceSummaries', [])]
+        print(f"KB: {self.kb_id} has data sources: {results}")
+        return results
+
+    def get_kb_datasource_filter(self, data_source_ids: List[str]) -> dict:
+        if len (data_source_ids) == 0:
+            return {}
+        if len(data_source_ids) == 1:
+            return {
+                'equals': {
+                    'key': 'x-amz-bedrock-kb-data-source-id',
+                    'value': data_source_ids[0]
+                }
+            }
+        filter = {"orAll": []}
+        for data_source_id in data_source_ids:
+            filter['orAll'].append({
+                "equals": {
+                    "key": "x-amz-bedrock-kb-data-source-id",
+                    "value": data_source_id
+                }
+            })
+        return filter
+
+    def inference(self, text: str, ):
+        if not self.kb_id:
             raise ValueError("Knowledge Base ID is required")
         print(f'inferencing: {text}')
+        pprint(self.filter)
         # https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_RetrieveAndGenerate.html
         response = self.client.retrieve_and_generate(
             input={
                 'text': text
             },
             retrieveAndGenerateConfiguration={
+                'type': 'KNOWLEDGE_BASE',
                 'knowledgeBaseConfiguration': {
-                    'knowledgeBaseId': kb_id,
+                    'knowledgeBaseId': self.kb_id,
                     'modelArn': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0',
                     'retrievalConfiguration': {
                         'vectorSearchConfiguration': {
                             'overrideSearchType': 'HYBRID',
                             "numberOfResults": 10,
+                            "filter": self.filter
                         }
                     }
-                },
-                # "externalSourcesConfiguration": {
-                #     "generationConfiguration": {
-                #         "promptTemplate": {
-                #             "textPromptTemplate": "prompt template"
-                #         }
-                #     }
-                # },
-                'type': 'KNOWLEDGE_BASE'
+                }
             }
+            #     # "externalSourcesConfiguration": {
+            #     #     "generationConfiguration": {
+            #     #         "promptTemplate": {
+            #     #             "textPromptTemplate": "prompt template"
+            #     #         }
+            #     #     }
+            #     # },
+            #
+            # }
         )
 
         output = response.get('output', {}).get('text', '')

@@ -24,4 +24,4 @@ def encrypt_with_public_key(message):
     return urllib.parse.quote(encrypted)
 
 kb_id = input("I will generate an access url, give me the aws-kb-id: ")
-print(f"http://your-domain:8501?kb-id={encrypt_with_public_key(kb_id)}")
+print(f"http://localhost:8501?kb-id={encrypt_with_public_key(kb_id)}")
