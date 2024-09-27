@@ -71,7 +71,7 @@ class Chat:
     #     return session
 
     def get_data_source_ids(self) -> List[str]:
-        client = boto3.client('bedrock-agent')  # , region_name=Config.LOCATION)
+        client = boto3.client('bedrock-agent', region_name=Config.LOCATION)
         response = client.list_data_sources(
             knowledgeBaseId=self.kb_id,
             maxResults=100,
