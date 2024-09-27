@@ -25,7 +25,6 @@ def decrypt_with_private_key(encrypted_message):
             password=None,
             backend=default_backend()
         )
-
     try:
         encrypted_message = urllib.parse.unquote(encrypted_message)
         encrypted_bytes = base64.b64decode(encrypted_message)
@@ -45,34 +44,34 @@ def decrypt_with_private_key(encrypted_message):
 class Chat:
     def __init__(self, kb_id: str):
         # load_dotenv()
-        self.session = self.__get_sessoin()
-        self.client = self.session.client('bedrock-agent-runtime', region_name=Config.LOCATION)
+        # self.session = self.__get_sessoin()
+        self.client = boto3.client('bedrock-agent-runtime', region_name=Config.LOCATION)
         self.kb_id = kb_id
         data_source_ids = self.get_data_source_ids()
         self.filter = self.get_kb_datasource_filter(data_source_ids)
 
-    def __get_sessoin(self):
-        sts_client = boto3.client('sts')
-
-        # Assume the role
-        response = sts_client.assume_role(
-            RoleArn='arn:aws:iam::730335415390:role/my-st-app-role',  # Replace with your Role ARN
-            RoleSessionName='S3AccessSession'
-        )
-
-        credentials = response['Credentials']
-
-        # Use the temporary credentials to create a session
-        session = Session(
-            aws_access_key_id=credentials.get('AccessKeyId'),
-            aws_secret_access_key=credentials.get('SecretAccessKey'),
-            aws_session_token=credentials.get('SessionToken'),
-            profile_name="AWSAdministratorAccess-730335415390",
-        )
-        return session
+    # def __get_sessoin(self):
+    #     sts_client = boto3.client('sts')
+    #
+    #     # Assume the role
+    #     response = sts_client.assume_role(
+    #         RoleArn='arn:aws:iam::730335415390:role/my-st-app-role',  # Replace with your Role ARN
+    #         RoleSessionName='S3AccessSession'
+    #     )
+    #
+    #     credentials = response['Credentials']
+    #
+    #     # Use the temporary credentials to create a session
+    #     session = Session(
+    #         aws_access_key_id=credentials.get('AccessKeyId'),
+    #         aws_secret_access_key=credentials.get('SecretAccessKey'),
+    #         aws_session_token=credentials.get('SessionToken'),
+    #         profile_name="AWSAdministratorAccess-730335415390",
+    #     )
+    #     return session
 
     def get_data_source_ids(self) -> List[str]:
-        client = self.session.client('bedrock-agent')  # , region_name=Config.LOCATION)
+        client = boto3.client('bedrock-agent')  # , region_name=Config.LOCATION)
         response = client.list_data_sources(
             knowledgeBaseId=self.kb_id,
             maxResults=100,
