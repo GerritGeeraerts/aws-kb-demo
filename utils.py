@@ -1,15 +1,13 @@
 import re
 from pprint import pprint
 from typing import List
-
 import boto3
-from boto3 import Session
-from dotenv import load_dotenv
 import urllib.parse
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
 import base64
+
 from config import Config
 
 
@@ -17,6 +15,24 @@ def s3_path_to_relative_path(s3_path: str) -> str:
     """use this regex replace:  to replace the s3 path with an empty string"""
     return re.sub(r's3://[^/]*/', "", s3_path)
 
+
+def encrypt_with_public_key(message):
+    with open(Config.PUBLIC_KEY_PATH, 'rb') as key_file:
+        public_key = serialization.load_pem_public_key(
+            key_file.read(),
+            backend=default_backend()
+        )
+    message_bytes = message.encode('utf-8')
+    encrypted = public_key.encrypt(
+        message_bytes,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    encrypted = base64.b64encode(encrypted).decode('utf-8')
+    return urllib.parse.quote(encrypted)
 
 def decrypt_with_private_key(encrypted_message):
     with open(Config.PRIVATE_KEY_PATH, 'rb') as key_file:
@@ -43,32 +59,11 @@ def decrypt_with_private_key(encrypted_message):
 
 class Chat:
     def __init__(self, kb_id: str):
-        # load_dotenv()
-        # self.session = self.__get_sessoin()
         self.client = boto3.client('bedrock-agent-runtime', region_name=Config.LOCATION)
         self.kb_id = kb_id
         data_source_ids = self.get_data_source_ids()
         self.filter = self.get_kb_datasource_filter(data_source_ids)
 
-    # def __get_sessoin(self):
-    #     sts_client = boto3.client('sts')
-    #
-    #     # Assume the role
-    #     response = sts_client.assume_role(
-    #         RoleArn='arn:aws:iam::730335415390:role/my-st-app-role',  # Replace with your Role ARN
-    #         RoleSessionName='S3AccessSession'
-    #     )
-    #
-    #     credentials = response['Credentials']
-    #
-    #     # Use the temporary credentials to create a session
-    #     session = Session(
-    #         aws_access_key_id=credentials.get('AccessKeyId'),
-    #         aws_secret_access_key=credentials.get('SecretAccessKey'),
-    #         aws_session_token=credentials.get('SessionToken'),
-    #         profile_name="AWSAdministratorAccess-730335415390",
-    #     )
-    #     return session
 
     def get_data_source_ids(self) -> List[str]:
         client = boto3.client('bedrock-agent', region_name=Config.LOCATION)
@@ -114,25 +109,31 @@ class Chat:
                 'type': 'KNOWLEDGE_BASE',
                 'knowledgeBaseConfiguration': {
                     'knowledgeBaseId': self.kb_id,
-                    'modelArn': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0',
+                    'modelArn': Config.MODEL_ARN,
                     'retrievalConfiguration': {
                         'vectorSearchConfiguration': {
-                            'overrideSearchType': 'HYBRID',
-                            "numberOfResults": 10,
+                            'overrideSearchType': Config.SEARCH_TYPE,
+                            "numberOfResults": Config.NUMBER_OF_RETRIEVED_DOCUMENTS,
                             "filter": self.filter
                         }
-                    }
+                    },
+                    "generationConfiguration": {
+                        "inferenceConfig": {
+                            "textInferenceConfig": {
+                                "maxTokens": Config.MAX_OUTPUT_TOKENS,
+                                "stopSequences": [
+                                    "\nObservation"
+                                ],
+                                "temperature": Config.TEMPERATURE,
+                                "topP": Config.TOP_P,
+                            }
+                        },
+                        "promptTemplate": {
+                            "textPromptTemplate": Config.PROMPT_TEMPLATE
+                        }
+                    },
                 }
             }
-            #     # "externalSourcesConfiguration": {
-            #     #     "generationConfiguration": {
-            #     #         "promptTemplate": {
-            #     #             "textPromptTemplate": "prompt template"
-            #     #         }
-            #     #     }
-            #     # },
-            #
-            # }
         )
 
         output = response.get('output', {}).get('text', '')
