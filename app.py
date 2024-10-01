@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils import Chat, decrypt_with_private_key, backend_to_friendly
+from utils import Chat, RsaEncryptor, backend_to_friendly
 
 
 def submit_button_state_toggle():
@@ -26,7 +26,7 @@ if not st.session_state.encoded_kb_id:
     st.write("Invalid url, contact sumsum")
     st.stop()
 
-st.session_state.kb_id = decrypt_with_private_key(st.session_state.encoded_kb_id)
+st.session_state.kb_id = RsaEncryptor.decrypt_with_private_key(st.session_state.encoded_kb_id)
 if not st.session_state.kb_id:
     st.write("Invalid url, contact sumsum")
     st.stop()

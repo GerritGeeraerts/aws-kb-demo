@@ -10,60 +10,58 @@ import base64
 
 from config import Config
 
-
-def s3_path_to_relative_path(s3_path: str) -> str:
-    """use this regex replace:  to replace the s3 path with an empty string"""
-    return re.sub(r's3://[^/]*/', "", s3_path)
-
-
 def backend_to_friendly(name: str) -> str:
     """Convert backend name to friendly name"""
     if not name:
         return ""
+    if name.startswith("s3://"):
+        return re.sub(r's3://[^/]*/', "", name)
+    # standard replace all the special characters with space and auto capitalize
     return re.sub('[^a-zA-Z0-9]', " ", name).title()
 
-print(backend_to_friendly("arstar-rast"))
-
-def encrypt_with_public_key(message):
-    with open(Config.PUBLIC_KEY_PATH, 'rb') as key_file:
-        public_key = serialization.load_pem_public_key(
-            key_file.read(),
-            backend=default_backend()
-        )
-    message_bytes = message.encode('utf-8')
-    encrypted = public_key.encrypt(
-        message_bytes,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-    encrypted = base64.b64encode(encrypted).decode('utf-8')
-    return urllib.parse.quote(encrypted)
-
-def decrypt_with_private_key(encrypted_message):
-    with open(Config.PRIVATE_KEY_PATH, 'rb') as key_file:
-        private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=None,
-            backend=default_backend()
-        )
-    try:
-        encrypted_message = urllib.parse.unquote(encrypted_message)
-        encrypted_bytes = base64.b64decode(encrypted_message)
-        decrypted_message = private_key.decrypt(
-            encrypted_bytes,
+class RsaEncryptor:
+    @classmethod
+    def encrypt_with_public_key(cls, message):
+        with open(Config.PUBLIC_KEY_PATH, 'rb') as key_file:
+            public_key = serialization.load_pem_public_key(
+                key_file.read(),
+                backend=default_backend()
+            )
+        message_bytes = message.encode('utf-8')
+        encrypted = public_key.encrypt(
+            message_bytes,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
                 label=None
             )
         )
-        return decrypted_message.decode('utf-8')
-    except Exception as e:
-        print("Decryption failed:", e)
-        return None
+        encrypted = base64.b64encode(encrypted).decode('utf-8')
+        return urllib.parse.quote(encrypted)
+
+    @classmethod
+    def decrypt_with_private_key(cls, encrypted_message):
+        with open(Config.PRIVATE_KEY_PATH, 'rb') as key_file:
+            private_key = serialization.load_pem_private_key(
+                key_file.read(),
+                password=None,
+                backend=default_backend()
+            )
+        try:
+            encrypted_message = urllib.parse.unquote(encrypted_message)
+            encrypted_bytes = base64.b64decode(encrypted_message)
+            decrypted_message = private_key.decrypt(
+                encrypted_bytes,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            return decrypted_message.decode('utf-8')
+        except Exception as e:
+            print("Decryption failed:", e)
+            return None
 
 class Chat:
     def __init__(self, kb_id: str):
@@ -170,7 +168,7 @@ class Chat:
                 continue
             if citation.get('location', {}).get('type', '') == 'S3':
                 url = citation.get('location', {}).get('s3Location', {}).get('uri', '')
-                url = s3_path_to_relative_path(url)
+                url = backend_to_friendly(url)
                 clean_citations.append({
                     "citation": text,
                     "url": url
@@ -179,8 +177,3 @@ class Chat:
             "output": output,
             "citations": clean_citations
         }
-
-
-if __name__ == "__main__":
-    chat_client = Chat(kb_id="2QSIT8PNME")
-    print(chat_client.get_kb_name("2QSIT8PNME"))
