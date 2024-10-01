@@ -16,6 +16,15 @@ def s3_path_to_relative_path(s3_path: str) -> str:
     return re.sub(r's3://[^/]*/', "", s3_path)
 
 
+def backend_to_friendly(name: str) -> str:
+    """Convert backend name to friendly name"""
+    if not name:
+        return ""
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1 \2', s1).replace('_', ' ').replace('-', ' ').title().replace(' ', '')
+
+
+
 def encrypt_with_public_key(message):
     with open(Config.PUBLIC_KEY_PATH, 'rb') as key_file:
         public_key = serialization.load_pem_public_key(
@@ -60,14 +69,24 @@ def decrypt_with_private_key(encrypted_message):
 class Chat:
     def __init__(self, kb_id: str):
         self.client = boto3.client('bedrock-agent-runtime', region_name=Config.LOCATION)
+        self.client_bedrock_agent = boto3.client('bedrock-agent', region_name=Config.LOCATION)
         self.kb_id = kb_id
         data_source_ids = self.get_data_source_ids()
         self.filter = self.get_kb_datasource_filter(data_source_ids)
+        self.kb_name = self.__get_kb_name(kb_id)
+
+    def __get_kb_name(self, knowledge_base_id: str) -> str:
+        # Call the get_knowledge_base API with the provided knowledge base ID
+        response = self.client_bedrock_agent.get_knowledge_base(
+            knowledgeBaseId=knowledge_base_id
+        )
+        # Retrieve the name of the knowledge base
+        knowledge_base_name = response['knowledgeBase']['name']
+        return knowledge_base_name
 
 
     def get_data_source_ids(self) -> List[str]:
-        client = boto3.client('bedrock-agent', region_name=Config.LOCATION)
-        response = client.list_data_sources(
+        response = self.client_bedrock_agent.list_data_sources(
             knowledgeBaseId=self.kb_id,
             maxResults=100,
         )
@@ -161,3 +180,8 @@ class Chat:
             "output": output,
             "citations": clean_citations
         }
+
+
+if __name__ == "__main__":
+    chat_client = Chat(kb_id="2QSIT8PNME")
+    print(chat_client.get_kb_name("2QSIT8PNME"))

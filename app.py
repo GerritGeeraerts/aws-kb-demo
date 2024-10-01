@@ -1,6 +1,7 @@
 import streamlit as st
 
-from utils import Chat, decrypt_with_private_key
+from utils import Chat, decrypt_with_private_key, backend_to_friendly
+
 
 def submit_button_state_toggle():
     st.session_state.submit_button_state_disabled = not st.session_state.submit_button_state_disabled
@@ -20,8 +21,6 @@ if "encoded_kb_id" not in st.session_state:
 if "filter" not in st.session_state:
     st.session_state.filter = {}
 
-st.title("Chat with your data 🤖")
-
 st.session_state.encoded_kb_id = st.query_params.get('kb-id')
 if not st.session_state.encoded_kb_id:
     st.write("Invalid url, contact sumsum")
@@ -35,6 +34,7 @@ if not st.session_state.kb_id:
 if 'chat_client' not in st.session_state:
     st.session_state.chat_client = Chat(kb_id=st.session_state.kb_id)
 
+st.title(f"Chat with {backend_to_friendly(st.session_state.chat_client.kb_name)}")
 st.write("## Question:")
 text_area = st.text_area("Enter Question here:", height=200, help="This question will be answered with your data", value=st.session_state.question)
 submit = st.button("Submit", disabled=st.session_state.submit_button_state_disabled)
