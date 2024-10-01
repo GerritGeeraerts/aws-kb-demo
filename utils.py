@@ -20,10 +20,9 @@ def backend_to_friendly(name: str) -> str:
     """Convert backend name to friendly name"""
     if not name:
         return ""
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1 \2', s1).replace('_', ' ').replace('-', ' ').title().replace(' ', '')
+    return re.sub('[^a-zA-Z0-9]', " ", name).title()
 
-
+print(backend_to_friendly("arstar-rast"))
 
 def encrypt_with_public_key(message):
     with open(Config.PUBLIC_KEY_PATH, 'rb') as key_file:
