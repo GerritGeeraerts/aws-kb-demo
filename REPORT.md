@@ -87,6 +87,10 @@
       - 🟢 Its super easy to (re)crawl a website or any datasource via the **easy sync option**.
       - 🟢 Easy button that can split query into sub queries to get a better retrieval results
       - 🟢 Hybrid search (keyword and vector)
+      - 🟢 Contextualizes rag queries out of the box
+      - 🟢 Agent based retrieval for multiple retrieval calls.
+      - 🟢 A lot is abstracted away what makes it easy to use.
+      - 🔴 A lot is abstracted away, you can not see or change what's happening under the hood.
       - 🔴 Bedrock Knowledge bases has a lot of **preview** features and is a product that is actively being worked on.
       - 🔴 I miss a way to turn of the opensearch service, or to pay per retrieval request, the open search vector store locks resources even if you do not search. from my actual costs used I estimate it at about minimal **130$ per month per open search vector db**.
       - 🔴 **I miss** a simple way to chat with **multiple databases on 1 vector store**, needs some configurations and workarounds to setup.
@@ -116,7 +120,7 @@
 	- # Conclusion
 		- 🟢 Full Control over everything for example: Control over doc similarity
 		- 🟢 Extensible plugins: integrate all kind of models / tools
-		- 🟢 (Also Amazon)
+		- 🟢 It also integrates with Amazon services
 		- 🟢 Flexibility
 		- 🔴 Complex
 - # LLM
