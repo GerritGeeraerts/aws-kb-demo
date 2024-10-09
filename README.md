@@ -72,6 +72,13 @@ Set up an EC2 instance with ubuntu and with a public static ip and assign a role
     ]
 }
 ```
+## Connect to the ec2 via ssh
+Click connect and copy the ssh command of you ec2 instance.
+![Connect](./assets/bedrock-12.png)
+![Copy SSD Command](./assets/bedrock-13.png)
+Execute the copied command in your terminal and make sure you have the `your-ec2-rsa-key.pem` in the folder where you 
+execute the ssh command.
+
 ## Clone the repository
 ```bash
 git clone https://github.com/GerritGeeraerts/aws-kb-demo
