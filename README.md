@@ -78,6 +78,7 @@ Click connect and copy the ssh command of you ec2 instance.
 ![Copy SSD Command](./assets/bedrock-13.png)
 Execute the copied command in your terminal and make sure you have the `your-ec2-rsa-key.pem` in the folder where you 
 execute the ssh command.
+Ian has this file!
 
 ## Clone the repository
 ```bash
