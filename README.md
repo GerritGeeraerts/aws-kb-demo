@@ -136,7 +136,7 @@ sudo systemctl start streamlit-app.service
 ```bash
 sudo systemctl status streamlit-app.service
 ```
-# 🌐 EC2 after initial setup
+# 🛠️ EC2 after initial setup
 To save resources you can turn the EC2 off and on and copy the public ip.
 ![Turn EC2 on and off](./assets/ec2-1.png)
 ![Copy public ip](./assets/ec2-2.png)
