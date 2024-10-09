@@ -183,4 +183,3 @@ replace `localhost` with the public ip of your ec2.
 ![Delete the KB](./assets/bedrock-10.png)
 2. Go to the vector store and delete the vector store
 ![Delete the Vector store](./assets/bedrock-11.png)
-

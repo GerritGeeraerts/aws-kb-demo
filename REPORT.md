@@ -21,7 +21,7 @@
         - Data sources hold configuration to access data, so when you create a web crawler for example nothing is crawled yet.
     - ### Opensearch Vector Store
         - This is the vector store which is derived from elastic search.
-        - In the dashboard you can execute DSL (Elastic search) querys
+        - In the dashboard you can execute DSL (Elastic search) query's
     - ### Knowledge base Layer
         - Is responsible for getting the data from the Data Sources to the vector store. This happens when you Sync. In the case of a web crawler it will start when you hit sync.
 - ## Applied Example: Out of the Box
@@ -62,7 +62,8 @@
               a chatcompletion request to the `SumsumKnowledgeBaseId` you will be chatting with   
               `Combined OpenSearch Vector Store` and therefor with `KB: SUMSUM` and `KB: Raccoons`  
         - #### Configuration: Retrieval filters
-            - With filters, we can solve the problem of above, via the `ListDataSources` we can list the all the data sources used in for examplet the SUMSUM KB and then we can build a filter like this:
+            - With filters, we can solve the problem of above, via the `ListDataSources` we can list the all the data 
+            - sources used in for example the SUMSUM KB and then we can build a filter like this:
             -
               ```json
               {
