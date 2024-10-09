@@ -98,6 +98,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+Note: The project was created with python 3.10
 ## Manually test the project
 ```bash
 streamlit run app.py
