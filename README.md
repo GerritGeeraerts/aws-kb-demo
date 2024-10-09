@@ -90,6 +90,7 @@ The commands below create private_key.pem and public_key.pem. The public key is 
 When you want to create an url on your local machine (with create_url.py) make sure you copied the same keys from the 
 server to your local machine.
 ```bash
+# in the project root
 openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:768
 openssl rsa -pubout -in private_key.pem -out public_key.pem
 ```
@@ -147,7 +148,7 @@ To save resources you can turn the EC2 off and on and copy the public ip.
 1. Create a knowledge base:
 ![Create knowledge base](./assets/bedrock-1.png)
 2. Choose S3 or Web Crawler as data source:
-![Choose KB data source type](./assets/bedrock-1.png)
+![Choose KB data source type](./assets/bedrock-2.png)
 3. Choose webcrawler as data source and select default sync scope
 ![Webcrawler as data source](./assets/bedrock-3.png)
 4. Select custom chunking and set to hierarchical chunking
