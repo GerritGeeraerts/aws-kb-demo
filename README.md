@@ -5,7 +5,7 @@
 ![Bedrock](https://img.shields.io/badge/Bedrock-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Elastic](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)
 
-# Exploring the AWS Bedrock Knowledge Bases. 
+# 📚 Exploring the AWS Bedrock Knowledge Bases. 
 ```mermaid
 graph TD
     subgraph DataSources
@@ -23,7 +23,7 @@ graph TD
     F[Knowledge Base] --> G
     G[OpenSearch Vector Store]
 ```
-# Combined OpenSearch Vector Store
+# 💡Combined OpenSearch Vector Store, save money
 As the OpenSearch Vector Store is the costly component of the architecture. I created a combined OpenSearch Vector Store 
 at the time of retrieval we pass in filters so we can retrieve only the relevant data. This way we can reduce the cost of
 the OpenSearch Vector Store. When you create a OpenSearch Vector Store it reserves the resources, and you can not turn it off.
@@ -39,7 +39,7 @@ flowchart
     J[KB: Raccoons] --> G
 ```
 
-# Project structure
+# 📁 Project structure
 ```
 .
 ├── app.py  # Streamlit app
@@ -51,7 +51,7 @@ flowchart
 ├── requirements.txt
 └── utils.py  # helper functions
 ```
-# EC2 Initial Setup
+# ⚙️ EC2 Initial Setup
 Set up an EC2 instance with ubuntu and with a public static ip and assign a role that allows all required permissions.
 ```json
 {
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 ```bash
 streamlit run app.py
 ```
-## Automatically start app on startup
+## 🔄 Automatically start app on startup
 ### Create the service file
 ```bash
 sudo nano /etc/systemd/system/streamlit-app.service
@@ -129,7 +129,7 @@ sudo systemctl start streamlit-app.service
 ```bash
 sudo systemctl status streamlit-app.service
 ```
-# EC2 after initial setup
+# 🌐 EC2 after initial setup
 To save resources you can turn the EC2 off and on and copy the public ip.
 ![Turn EC2 on and off](./assets/ec2-1.png)
 ![Copy public ip](./assets/ec2-2.png)
@@ -167,8 +167,8 @@ python create_url.py
 ```
 The script will output an encrypted URL that serves as you can only access the demo if you have the url. Make sure to 
 replace `localhost` with the public ip of your ec2.
-# Delete the knowledge base and Vector Store
-> **Warning** Vector store database is the costly component of the architecture. When you do not need it delete it.
+# 💵 Delete the knowledge base and Vector Store, to save costs
+> **Warning** Vector store database is the 💵 costly component of the architecture. When you do not need it delete it.
 
 > **Note** the vector store contains all the data from all the knowledge bases attached to it.
 1. Go to the knowledge base you want to delete and delete the KB
