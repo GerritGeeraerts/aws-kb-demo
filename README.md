@@ -167,4 +167,12 @@ python create_url.py
 ```
 The script will output an encrypted URL that serves as you can only access the demo if you have the url. Make sure to 
 replace `localhost` with the public ip of your ec2.
+# Delete the knowledge base and Vector Store
+> **Warning** Vector store database is the costly component of the architecture. When you do not need it delete it.
+
+> **Note** the vector store contains all the data from all the knowledge bases attached to it.
+1. Go to the knowledge base you want to delete and delete the KB
+![Delete the KB](./assets/bedrock-10.png)
+2. Go to the vector store and delete the vector store
+![Delete the Vector store](./assets/bedrock-11.png)
 
