@@ -147,15 +147,15 @@ To save resources you can turn the EC2 off and on and copy the public ip.
 ![Titan embeddings](./assets/bedrock-5.png)
 6. If it is the first KB select quick create a new vector store, **otherwise select an existing vector store and copy 
 the vector database config from an existing vector store. (Look at step 9)**
-![](./assets/bedrock-6.png)
+![Configure Vector store](./assets/bedrock-6.png)
 7. Select the created data source and click sync, you can also click add data source so you can add an extra 
 webcrawler or s3 bucket:
-![](./assets/bedrock-7.png)
+![Sync Data source to vector store](./assets/bedrock-7.png)
 8. Copy the knowledge base id, you will need this to create the access url. 
-![](./assets/bedrock-8.png)
+![Copy KB-ID](./assets/bedrock-8.png)
 9. When creating a second knowledge base, look at an existing KB and copy the vector database info to the one you are 
 creating.
-![](./assets/bedrock-9.png)
+![Copy vector db config for a second KB](./assets/bedrock-9.png)
 ## Create access url for knowledge base
 The app can talk with different AWS Bedrock Knowledge Bases. To talk to a specific knowledge base, you need to create 
 an encrypted URL. You can do this with the `create_url.py` script. The encrypted url serves as a 
