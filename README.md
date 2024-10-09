@@ -23,7 +23,7 @@ graph TD
     F[Knowledge Base] --> G
     G[OpenSearch Vector Store]
 ```
-# 💡Combined OpenSearch Vector Store, save money
+# 💡Combined OpenSearch Vector Store, save money 🧜‍♀️
 As the OpenSearch Vector Store is the costly component of the architecture. I created a combined OpenSearch Vector Store 
 at the time of retrieval we pass in filters so we can retrieve only the relevant data. This way we can reduce the cost of
 the OpenSearch Vector Store. When you create a OpenSearch Vector Store it reserves the resources, and you can not turn it off.
