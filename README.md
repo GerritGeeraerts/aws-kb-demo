@@ -51,13 +51,36 @@ flowchart
 ├── requirements.txt
 └── utils.py  # helper functions
 ```
-# Installation on EC2
+# EC2 Initial Setup
+Set up an EC2 instance with ubuntu and with a public static ip and assign a role that allows all required permissions.
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:ListDataSources",
+                "bedrock:RetrieveAndGenerate",
+                "bedrock:Retrieve",
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModel",
+                "bedrock:GetKnowledgeBase"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 ## Clone the repository
 ```bash
 git clone https://github.com/GerritGeeraerts/aws-kb-demo
 cd ./aws-kb-demo
 ```
 ## Creating public and private key for secure access links
+The commands below create private_key.pem and public_key.pem. The public key is used to encrypt the access links.
+When you want to create an url on your local machine (with create_url.py) make sure you copied the same keys from the 
+server to your local machine.
 ```bash
 openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:768
 openssl rsa -pubout -in private_key.pem -out public_key.pem
@@ -68,12 +91,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
 ## Manually test the project
 ```bash
 streamlit run app.py
 ```
-
 ## Automatically start app on startup
 ### Create the service file
 ```bash
@@ -108,30 +129,39 @@ sudo systemctl start streamlit-app.service
 ```bash
 sudo systemctl status streamlit-app.service
 ```
-# Requirements
-The EC2 need a role that has a policy with the following permissions:
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "bedrock:ListDataSources",
-                "bedrock:RetrieveAndGenerate",
-                "bedrock:Retrieve",
-                "bedrock:InvokeModel"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
-# Create access url for knowledge base
+# EC2 after initial setup
+To save resources you can turn the EC2 off and on and copy the public ip.
+![Turn EC2 on and off](./assets/ec2-1.png)
+![Copy public ip](./assets/ec2-2.png)
+# Bedrock setup
+## Create knowledge base
+1. Create a knowledge base:
+![Create knowledge base](./assets/bedrock-1.png)
+2. Choose S3 or Web Crawler as data source:
+![Choose KB data source type](./assets/bedrock-1.png)
+3. Choose webcrawler as data source and select default sync scope
+![Webcrawler as data source](./assets/bedrock-3.png)
+4. Select custom chunking and set to hierarchical chunking
+![Hierarchical chunking](./assets/bedrock-4.png)
+5. Choose titan embeddings V2, is required for larger text chunks
+![Titan embeddings](./assets/bedrock-5.png)
+6. If it is the first KB select quick create a new vector store, **otherwise select an existing vector store and copy 
+the vector database config from an existing vector store. (Look at step 9)**
+![](./assets/bedrock-6.png)
+7. Select the created data source and click sync, you can also click add data source so you can add an extra 
+webcrawler or s3 bucket:
+![](./assets/bedrock-7.png)
+8. Copy the knowledge base id, you will need this to create the access url. 
+![](./assets/bedrock-8.png)
+9. When creating a second knowledge base, look at an existing KB and copy the vector database info to the one you are 
+creating.
+![](./assets/bedrock-9.png)
+## Create access url for knowledge base
 The app can talk with different AWS Bedrock Knowledge Bases. To talk to a specific knowledge base, you need to create 
-an encrypted URL. You can do this with the `create_url.py` script. The encrypted url serves as
-you have access only if you know the url. So you can easily share secure urls without managing logins.
-Run the script and provide the knowledge base id when prompted.
+an encrypted URL. You can do this with the `create_url.py` script. The encrypted url serves as a 
+you-have-access-if-you-have-the-url. So you can easily share secure urls without managing logins.
+Run the script and provide the knowledge base id when prompted. If you are creating an access url. 
+Make sure you have the same public and private key from the ec2 server on your local machine.
 ```bash
 python create_url.py
 ```
